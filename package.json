@@ -1,22 +1,27 @@
 {
   "name": "wallybot",
   "version": "1.0.0",
-  "description": "WhatsApp Web3 Assistant using Twilio and Nodit MCP",
+  "description": "WhatsApp Web3 Assistant using Twilio and Nodit API",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "test": "jest"
+    "prod": "NODE_ENV=production node src/index.js",
+    "pm2:start": "pm2 start ecosystem.config.js",
+    "pm2:stop": "pm2 stop wallybot",
+    "pm2:restart": "pm2 restart wallybot",
+    "pm2:logs": "pm2 logs wallybot"
   },
   "keywords": [
     "whatsapp",
     "web3",
     "twilio",
     "nodit",
-    "mcp",
     "blockchain",
     "ethereum",
-    "polygon"
+    "polygon",
+    "crypto",
+    "bot"
   ],
   "author": "Sambit Sargam Ekalabya",
   "license": "MIT",
@@ -28,13 +33,14 @@
     "body-parser": "^1.20.2",
     "winston": "^3.11.0",
     "openai": "^4.20.0",
-    "@modelcontextprotocol/sdk": "^0.4.0"
+    "express-rate-limit": "^7.1.5",
+    "helmet": "^7.1.0"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1",
-    "jest": "^29.7.0"
+    "nodemon": "^3.0.1"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
   }
 }

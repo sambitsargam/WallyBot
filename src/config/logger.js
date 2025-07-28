@@ -24,6 +24,12 @@ winston.addColors(logColors);
 const logFormat = winston.format.combine(
     winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
     winston.format.errors({ stack: true }),
+    winston.format.json()
+);
+
+const consoleFormat = winston.format.combine(
+    winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+    winston.format.errors({ stack: true }),
     winston.format.colorize({ all: true }),
     winston.format.printf(
         (info) => `${info.timestamp} [${info.level}]: ${info.message}`
@@ -33,30 +39,36 @@ const logFormat = winston.format.combine(
 // Define log transports
 const transports = [
     new winston.transports.Console({
-        format: logFormat
-    }),
-    new winston.transports.File({
-        filename: 'logs/error.log',
-        level: 'error',
-        format: winston.format.combine(
-            winston.format.timestamp(),
-            winston.format.json()
-        )
-    }),
-    new winston.transports.File({
-        filename: 'logs/combined.log',
-        format: winston.format.combine(
-            winston.format.timestamp(),
-            winston.format.json()
-        )
+        format: process.env.NODE_ENV === 'production' ? logFormat : consoleFormat
     })
 ];
 
+// Add file logging in production
+if (process.env.NODE_ENV === 'production') {
+    transports.push(
+        new winston.transports.File({
+            filename: 'logs/error.log',
+            level: 'error',
+            format: logFormat,
+            maxsize: 10485760, // 10MB
+            maxFiles: 5
+        }),
+        new winston.transports.File({
+            filename: 'logs/combined.log',
+            format: logFormat,
+            maxsize: 10485760, // 10MB
+            maxFiles: 5
+        })
+    );
+}
+
 // Create logger instance
 const logger = winston.createLogger({
-    level: process.env.NODE_ENV === 'development' ? 'debug' : 'info',
+    level: process.env.LOG_LEVEL || (process.env.NODE_ENV === 'production' ? 'info' : 'debug'),
     levels: logLevels,
-    transports
+    transports,
+    // Don't exit on handled exceptions in production
+    exitOnError: process.env.NODE_ENV !== 'production'
 });
 
 module.exports = logger;

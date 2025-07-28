@@ -1,20 +1,31 @@
+// Load environment variables FIRST
+require('dotenv').config();
+
 const express = require('express');
 const bodyParser = require('body-parser');
-const dotenv = require('dotenv');
+const helmet = require('helmet');
 const logger = require('./config/logger');
 const webhookController = require('./controllers/webhookController');
 const rateLimiter = require('./middleware/rateLimiter');
 const auth = require('./middleware/auth');
 
-// Load environment variables
-dotenv.config();
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Security middleware
+app.use(helmet({
+    contentSecurityPolicy: false, // Disable CSP for API
+    crossOriginEmbedderPolicy: false
+}));
+
+// Trust proxy for production deployment
+if (process.env.NODE_ENV === 'production') {
+    app.set('trust proxy', 1);
+}
+
 // Middleware
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '1mb' }));
 app.use(rateLimiter);
 
 // Health check endpoint
@@ -41,7 +52,7 @@ app.get('/', (req, res) => {
 });
 
 // Twilio webhook endpoint
-app.post('/webhook', auth.validateTwilioSignature, webhookController.handleIncomingMessage);
+app.post('/webhook', auth.validateTwilioSignature, webhookController.handleIncomingMessage.bind(webhookController));
 
 // Error handling middleware
 app.use((err, req, res, next) => {

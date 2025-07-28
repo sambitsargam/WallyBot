@@ -1,10 +1,24 @@
-const { Client } = require('@modelcontextprotocol/sdk');
 const logger = require('../config/logger');
+
+// Try to import MCP SDK, handle if not available
+let Client;
+try {
+    const mcp = require('@modelcontextprotocol/sdk');
+    Client = mcp.Client;
+} catch (error) {
+    logger.warn('MCP SDK not available - running without MCP support');
+    Client = null;
+}
 
 class MCPService {
     constructor() {
         this.client = null;
         this.isConnected = false;
+        this.isEnabled = !!Client;
+        
+        if (!this.isEnabled) {
+            logger.warn('MCP service disabled - SDK not available');
+        }
     }
 
     /**
@@ -12,6 +26,10 @@ class MCPService {
      */
     async initialize() {
         try {
+            if (!this.isEnabled) {
+                throw new Error('MCP SDK not available');
+            }
+            
             this.client = new Client({
                 name: 'wallybot',
                 version: '1.0.0'
@@ -59,6 +77,10 @@ class MCPService {
      */
     async callTool(toolName, arguments_) {
         try {
+            if (!this.isEnabled) {
+                throw new Error('MCP not available');
+            }
+            
             if (!this.isConnected) {
                 await this.initialize();
             }

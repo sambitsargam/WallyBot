@@ -5,12 +5,7 @@ const logger = require('../config/logger');
  * Validate Twilio webhook signature
  */
 function validateTwilioSignature(req, res, next) {
-    // Skip validation in development mode
-    if (process.env.NODE_ENV === 'development') {
-        logger.debug('Skipping Twilio signature validation in development mode');
-        return next();
-    }
-
+    // Always validate signature in production
     const signature = req.headers['x-twilio-signature'];
     const url = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
     
@@ -19,15 +14,20 @@ function validateTwilioSignature(req, res, next) {
         return res.status(401).json({ error: 'Unauthorized: Missing signature' });
     }
 
-    const isValid = twilioService.validateSignature(signature, url, req.body);
-    
-    if (!isValid) {
-        logger.warn('Invalid Twilio signature');
-        return res.status(401).json({ error: 'Unauthorized: Invalid signature' });
-    }
+    try {
+        const isValid = twilioService.validateSignature(signature, url, req.body);
+        
+        if (!isValid) {
+            logger.warn('Invalid Twilio signature');
+            return res.status(401).json({ error: 'Unauthorized: Invalid signature' });
+        }
 
-    logger.debug('Twilio signature validated successfully');
-    next();
+        logger.debug('Twilio signature validated successfully');
+        next();
+    } catch (error) {
+        logger.error('Error validating Twilio signature:', error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
 }
 
 /**

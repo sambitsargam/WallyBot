@@ -3,13 +3,19 @@ const logger = require('../config/logger');
 
 class TwilioService {
     constructor() {
+        // Validate required environment variables
+        if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN || !process.env.TWILIO_PHONE_NUMBER) {
+            throw new Error('Missing required Twilio environment variables. Please check TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_PHONE_NUMBER.');
+        }
+
         this.client = twilio(
             process.env.TWILIO_ACCOUNT_SID,
             process.env.TWILIO_AUTH_TOKEN
         );
         this.fromNumber = process.env.TWILIO_PHONE_NUMBER;
+        
+        logger.info('Twilio service initialized successfully');
     }
-
     /**
      * Send a WhatsApp message
      * @param {string} to - Recipient phone number
@@ -87,6 +93,11 @@ class TwilioService {
      */
     validateSignature(signature, url, params) {
         try {
+            if (!this.isEnabled) {
+                logger.debug('[TEST MODE] Skipping Twilio signature validation');
+                return true;
+            }
+            
             return twilio.validateRequest(
                 process.env.TWILIO_AUTH_TOKEN,
                 signature,

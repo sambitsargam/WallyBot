@@ -1,6 +1,5 @@
 const twilioService = require('../services/twilioService');
 const noditService = require('../services/noditService');
-const mcpService = require('../services/mcpService');
 const openaiService = require('../services/openaiService');
 const messageParser = require('../utils/messageParser');
 const responseFormatter = require('../utils/responseFormatter');
@@ -85,14 +84,8 @@ class WebhookController {
         }
         
         try {
-            // Try MCP first, fallback to direct API
-            let balanceData;
-            try {
-                balanceData = await mcpService.getWalletBalance(address, chain);
-            } catch (error) {
-                logger.warn('MCP failed, trying direct API:', error.message);
-                balanceData = await noditService.getWalletBalance(address, chain);
-            }
+            // Get wallet balance using Nodit API
+            const balanceData = await noditService.getWalletBalance(address, chain);
             
             return await openaiService.generateResponse(balanceData, 'wallet_balance');
         } catch (error) {
@@ -116,27 +109,14 @@ class WebhookController {
             
             // If token looks like an address, get token info directly
             if (token.startsWith('0x') && token.length === 42) {
-                try {
-                    tokenData = await mcpService.getTokenInfo(token, chain);
-                } catch (error) {
-                    tokenData = await noditService.getTokenInfo(token, chain);
-                }
+                tokenData = await noditService.getTokenInfo(token, chain);
             } else {
                 // Search for token by symbol
-                try {
-                    const searchResults = await mcpService.searchTokens(token, chain);
-                    if (searchResults && searchResults.length > 0) {
-                        tokenData = searchResults[0];
-                    } else {
-                        throw new Error('Token not found');
-                    }
-                } catch (error) {
-                    const searchResults = await noditService.searchTokens(token, chain);
-                    if (searchResults && searchResults.length > 0) {
-                        tokenData = searchResults[0];
-                    } else {
-                        throw new Error('Token not found');
-                    }
+                const searchResults = await noditService.searchTokens(token, chain);
+                if (searchResults?.items && searchResults.items.length > 0) {
+                    tokenData = searchResults.items[0];
+                } else {
+                    throw new Error('Token not found');
                 }
             }
             
@@ -158,12 +138,7 @@ class WebhookController {
         }
         
         try {
-            let nftData;
-            try {
-                nftData = await mcpService.getNFTDetails(contractAddress, tokenId, chain);
-            } catch (error) {
-                nftData = await noditService.getNFTDetails(contractAddress, tokenId, chain);
-            }
+            const nftData = await noditService.getNFTDetails(contractAddress, tokenId, chain);
             
             return await openaiService.generateResponse(nftData, 'nft_details');
         } catch (error) {
@@ -186,17 +161,30 @@ class WebhookController {
             let priceData;
             
             if (token.startsWith('0x')) {
+                // Token contract address provided
                 priceData = await noditService.getTokenPrice(token, chain);
             } else {
-                // Search for token first, then get price
-                const searchResults = await noditService.searchTokens(token, chain);
-                if (searchResults && searchResults.length > 0) {
-                    priceData = await noditService.getTokenPrice(searchResults[0].address, chain);
-                    priceData.symbol = searchResults[0].symbol;
-                    priceData.name = searchResults[0].name;
-                } else {
-                    throw new Error('Token not found');
+                // Token symbol provided - try common tokens first
+                try {
+                    priceData = await noditService.getTokenPriceBySymbol(token, chain);
+                } catch (error) {
+                    // If not a common token, search for it
+                    const searchResults = await noditService.searchTokens(token, chain);
+                    if (searchResults?.items && searchResults.items.length > 0) {
+                        const tokenData = searchResults.items[0];
+                        priceData = await noditService.getTokenPrice(tokenData.address, chain);
+                        if (priceData) {
+                            priceData.symbol = tokenData.symbol;
+                            priceData.name = tokenData.name;
+                        }
+                    } else {
+                        throw new Error('Token not found');
+                    }
                 }
+            }
+            
+            if (!priceData) {
+                throw new Error('Price data not available');
             }
             
             return await openaiService.generateResponse(priceData, 'price_query');

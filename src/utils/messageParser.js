@@ -111,11 +111,11 @@ class MessageParser {
             wallet_balance: [
                 'balance', 'wallet', 'funds', 'money', 'eth balance', 'how much'
             ],
-            token_info: [
-                'token info', 'what is', 'tell me about', 'information about', 'details about'
-            ],
             price_query: [
                 'price', 'cost', 'value', 'worth', 'how much is', 'current price'
+            ],
+            token_info: [
+                'token info', 'what is', 'tell me about', 'information about', 'details about'
             ],
             nft_details: [
                 'nft', 'non-fungible', 'collectible', 'art piece', 'nft details'
