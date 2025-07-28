@@ -1,0 +1,40 @@
+{
+  "name": "wallybot",
+  "version": "1.0.0",
+  "description": "WhatsApp Web3 Assistant using Twilio and Nodit MCP",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "test": "jest"
+  },
+  "keywords": [
+    "whatsapp",
+    "web3",
+    "twilio",
+    "nodit",
+    "mcp",
+    "blockchain",
+    "ethereum",
+    "polygon"
+  ],
+  "author": "Sambit Sargam Ekalabya",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "twilio": "^4.19.0",
+    "axios": "^1.6.0",
+    "dotenv": "^16.3.1",
+    "body-parser": "^1.20.2",
+    "winston": "^3.11.0",
+    "openai": "^4.20.0",
+    "@modelcontextprotocol/sdk": "^0.4.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1",
+    "jest": "^29.7.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
