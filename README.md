@@ -1,53 +1,54 @@
-# WallyBot — WhatsApp Web3 Assistant 🪙
+# WallyBot 🪙 - WhatsApp Web3 Assistant
 
-A WhatsApp chatbot built with Twilio and Node.js that connects to Nodit MCP and Web3 Data APIs to provide wallet, token, and NFT information through natural language queries.
+> **Production-ready WhatsApp bot for Web3 data queries using Twilio and Nodit API**
 
-## 🚀 Features
+[![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Production Ready](https://img.shields.io/badge/Production-Ready-brightgreen.svg)]()
 
-- 💬 Answer wallet/token/NFT queries via natural language
-- 🔔 Send real-time alerts using Nodit's Webhook/Stream
-- 🌐 Support for Ethereum & Polygon chains
-- 🤖 Optional OpenAI integration for advanced NLP
-- 📱 WhatsApp integration via Twilio
+## 🌟 Features
 
-## 🛠️ Tech Stack
+- **💬 WhatsApp Integration**: Seamless messaging via Twilio
+- **� Multi-chain Support**: Ethereum & Polygon blockchain data
+- **💰 Wallet Queries**: Check balances, token holdings, NFTs
+- **� Real-time Prices**: Token prices with CoinMarketCap data
+- **🤖 AI-Powered**: Natural language processing with OpenAI
+- **🔒 Production Security**: Webhook signature validation, rate limiting
+- **📊 Performance**: Clustering, caching, monitoring ready
+- **🐳 Docker Support**: Containerized deployment
 
-- **Backend**: Node.js + Express
-- **Messaging**: Twilio WhatsApp API
-- **Web3 Data**: Nodit MCP & Web3 APIs
-- **AI**: OpenAI (optional)
-- **Logging**: Winston
+## � Quick Start
 
-## 📋 Prerequisites
-
-- Node.js >= 18.0.0
-- Twilio Account with WhatsApp API access
+### Prerequisites
+- Node.js 18+
+- Twilio WhatsApp Business Account
 - Nodit API Key
 - OpenAI API Key (optional)
 
-## 🔧 Installation
+### 1. Clone & Install
+```bash
+git clone https://github.com/sambitsargam/WallyBot.git
+cd WallyBot
+npm install
+```
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/sambitsargam/WallyBot.git
-   cd WallyBot
-   ```
+### 2. Configure Environment
+```bash
+cp .env.production .env
+# Edit .env with your API keys
+```
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
+### 3. Start Development
+```bash
+npm run dev
+```
 
-3. **Set up environment variables**
-   ```bash
-   cp .env.example .env
-   ```
-   Fill in your API keys and configuration in the `.env` file.
-
-4. **Start the development server**
-   ```bash
-   npm run dev
-   ```
+### 4. Production Deployment
+```bash
+npm run prod
+# or with PM2
+npm run pm2:start
+```
 
 ## 🔑 Configuration
 
