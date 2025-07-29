@@ -1,0 +1,53 @@
+# Multi-stage build for production
+FROM node:18-alpine AS builder
+
+# Install dumb-init for proper signal handling
+RUN apk add --no-cache dumb-init
+
+# Create app directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install production dependencies only
+RUN npm ci --only=production && npm cache clean --force
+
+FROM node:18-alpine AS production
+
+# Copy dumb-init from builder
+COPY --from=builder /usr/bin/dumb-init /usr/bin/dumb-init
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S wallybot -u 1001
+
+# Create app directory
+WORKDIR /app
+
+# Create logs directory
+RUN mkdir -p logs && chown -R wallybot:nodejs logs
+
+# Copy dependencies from builder
+COPY --from=builder --chown=wallybot:nodejs /app/node_modules ./node_modules
+
+# Copy application code
+COPY --chown=wallybot:nodejs src/ ./src/
+COPY --chown=wallybot:nodejs package*.json ./
+COPY --chown=wallybot:nodejs ecosystem.config.js ./
+
+# Switch to non-root user
+USER wallybot
+
+# Expose port
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3000/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
+
+# Use dumb-init to handle signals properly
+ENTRYPOINT ["dumb-init", "--"]
+
+# Start the application
+CMD ["node", "src/index.js"]

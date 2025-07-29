@@ -205,15 +205,8 @@ class WebhookController {
         }
         
         try {
-            let txData;
-            try {
-                txData = await mcpService.getTransactionDetails(txHash, chain);
-            } catch (error) {
-                // Direct API call for transaction details
-                throw new Error('Transaction lookup not implemented in direct API');
-            }
-            
-            return await openaiService.generateResponse(txData, 'transaction_details');
+            // Transaction details are not available in the current Nodit Web3 Data API
+            return "❌ *Transaction Details*\n\nTransaction lookup is not currently supported. Please use a blockchain explorer like Etherscan.io for detailed transaction information.\n\nYou can search for your transaction at:\n• Ethereum: https://etherscan.io/tx/" + txHash + "\n• Polygon: https://polygonscan.com/tx/" + txHash;
         } catch (error) {
             logger.error('Failed to get transaction details:', error);
             throw new Error('Unable to fetch transaction details. Please check the transaction hash.');
